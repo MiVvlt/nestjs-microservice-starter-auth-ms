@@ -1,21 +1,9 @@
-import {Controller, Get, Logger} from '@nestjs/common';
+import {Controller, Logger} from '@nestjs/common';
 import {AppService} from './app.service';
 import {MessagePattern} from '@nestjs/microservices';
+import {IAuthenticateResponseDto, ILoginRequestDto, IRegisterRequestDto, ITokensResponseDto} from './dto/auth.dto';
+import {Types} from 'mongoose';
 
-export interface ILoginRequestDto {
-    email: string,
-    password: string
-}
-
-export interface ILoginResponseDto {
-    token: string,
-    refreshToken: string
-}
-
-export interface IRegisterRequestDto {
-    token: string,
-    refreshToken: string
-}
 
 @Controller()
 export class AppController {
@@ -25,9 +13,23 @@ export class AppController {
     }
 
     @MessagePattern('login')
-    async login(credentials: ILoginRequestDto): Promise<ILoginResponseDto> {
-        this.logger.log('Logging in ')
+    async login(credentials: ILoginRequestDto): Promise<ITokensResponseDto> {
         return this.appService.login(credentials);
+    }
+
+    @MessagePattern('register')
+    async register(dto: IRegisterRequestDto): Promise<{id: Types.ObjectId}> {
+        return this.appService.register(dto);
+    }
+
+    @MessagePattern('refreshAccessToken')
+    async refreshAccessToken(refreshToken: string): Promise<string> {
+        return this.appService.refreshAccessToken(refreshToken);
+    }
+
+    @MessagePattern('authenticate')
+    async authenticate(token: string): Promise<IAuthenticateResponseDto> {
+        return this.appService.validateAccessToken(token);
     }
 
 }
