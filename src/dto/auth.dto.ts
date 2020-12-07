@@ -44,3 +44,12 @@ export class TokenPayload {
     sub: Types.ObjectId;
 }
 
+export class IMeResponseDto {
+    id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    roles?: Role[];
+    dateCreated?: Date;
+}
+

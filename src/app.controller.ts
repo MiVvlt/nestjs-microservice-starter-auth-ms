@@ -1,7 +1,7 @@
 import {Controller, Logger} from '@nestjs/common';
 import {AppService} from './app.service';
 import {MessagePattern} from '@nestjs/microservices';
-import {IAuthenticateResponseDto, ILoginRequestDto, IRegisterRequestDto, ITokensResponseDto} from './dto/auth.dto';
+import {IAuthenticateResponseDto, ILoginRequestDto, IMeResponseDto, IRegisterRequestDto, ITokensResponseDto} from './dto/auth.dto';
 import {Types} from 'mongoose';
 
 
@@ -30,6 +30,11 @@ export class AppController {
     @MessagePattern('authenticate')
     async authenticate(token: string): Promise<IAuthenticateResponseDto> {
         return this.appService.validateAccessToken(token);
+    }
+
+    @MessagePattern('me')
+    async me(token: string): Promise<IMeResponseDto> {
+        return this.appService.me(token);
     }
 
 }

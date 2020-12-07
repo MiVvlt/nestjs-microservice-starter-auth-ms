@@ -2,7 +2,14 @@ import {Injectable, Logger} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Users, UsersDocument} from './schemas/user.schema';
 import {Model, Types} from 'mongoose';
-import {IAuthenticateResponseDto, ILoginRequestDto, IRegisterRequestDto, ITokensResponseDto, TokenPayload} from './dto/auth.dto';
+import {
+    IAuthenticateResponseDto,
+    ILoginRequestDto,
+    IMeResponseDto,
+    IRegisterRequestDto,
+    ITokensResponseDto,
+    TokenPayload
+} from './dto/auth.dto';
 import {RpcException} from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
 import {JwtService} from '@nestjs/jwt';
@@ -117,6 +124,23 @@ export class AppService {
             throw new RpcException('Invalid credentials.');
         } else {
             return user;
+        }
+    }
+
+    async me(token: string): Promise<IMeResponseDto> {
+        try {
+            const result = await this.validateAccessToken(token);
+            const user = (await this.usersModel.findById( result.id)).toJSON();
+            return {
+                id: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                roles: user.roles,
+                dateCreated: user.dateCreated,
+            };
+        } catch (err) {
+            throw err;
         }
     }
 }
