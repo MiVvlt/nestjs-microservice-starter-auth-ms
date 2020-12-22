@@ -1,4 +1,9 @@
-import {IsEmail, IsNotEmpty, IsString} from 'class-validator';
+import {
+    IsEmail,
+    IsNotEmpty,
+    IsString,
+    MaxLength,
+} from 'class-validator';
 import {Role} from '../enums/role.enum';
 import {Types} from 'mongoose';
 
@@ -9,6 +14,15 @@ export class ILoginRequestDto {
 
     @IsNotEmpty()
     password: string;
+}
+
+export class IUploadAvatarRequestDto {
+    @IsNotEmpty()
+    @MaxLength(2000)
+    avatar: string;
+
+    @IsNotEmpty()
+    id: string;
 }
 
 export class IRegisterRequestDto {
@@ -48,6 +62,7 @@ export class IMeResponseDto {
     id: string;
     firstname: string;
     lastname: string;
+    avatar: string;
     email: string;
     roles?: Role[];
     dateCreated?: Date;
