@@ -7,6 +7,8 @@ import {
     IMeResponseDto,
     IRegisterRequestDto,
     ITokensResponseDto,
+    IUpdatePasswordRequestDto,
+    IUpdateProfileRequestDto,
     IUploadAvatarRequestDto,
 } from './dto/auth.dto';
 import {Types} from 'mongoose';
@@ -47,6 +49,16 @@ export class AppController {
     @MessagePattern('updateAvatar')
     async uploadAvatar(avatar: IUploadAvatarRequestDto): Promise<string> {
         return this.appService.uploadAvatar(avatar);
+    }
+
+    @MessagePattern('updatePassword')
+    async updatePassword(dto: IUpdatePasswordRequestDto): Promise<string> {
+        return this.appService.updatePassword(dto);
+    }
+
+    @MessagePattern('updateProfile')
+    async updateProfile(dto: IUpdateProfileRequestDto): Promise<IMeResponseDto> {
+        return this.appService.updateProfile(dto);
     }
 
 }

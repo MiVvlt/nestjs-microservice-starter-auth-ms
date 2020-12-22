@@ -14,9 +14,13 @@ import { isEmail } from 'class-validator';
 
 @Schema()
 export class Users {
-	@Prop() firstname: string;
+	@Prop( {
+		       maxlength: 100,
+	       } ) firstname: string;
 
-	@Prop() lastname: string;
+	@Prop( {
+		       maxlength: 100,
+	       } ) lastname: string;
 
 	@Prop( {
 		       required   : false,
@@ -31,6 +35,10 @@ export class Users {
 		       validate: [ isEmail, 'invalid email' ],
 		       unique  : true,
 	       } ) email: string;
+
+	@Prop( {
+		       maxlength: 255,
+	       } ) bio?: string;
 
 	@Prop( {
 		       required: true,

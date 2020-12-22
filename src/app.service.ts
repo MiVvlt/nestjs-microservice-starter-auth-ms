@@ -17,6 +17,8 @@ import {
 	IMeResponseDto,
 	IRegisterRequestDto,
 	ITokensResponseDto,
+	IUpdatePasswordRequestDto,
+	IUpdateProfileRequestDto,
 	IUploadAvatarRequestDto,
 	TokenPayload,
 } from './dto/auth.dto';
@@ -28,8 +30,6 @@ import { constants } from './constants';
 
 @Injectable()
 export class AppService {
-
-	private readonly logger = new Logger( 'AppService' );
 
 	private readonly refreshTokenConfig = {
 		secret   : constants.refreshTokenSecret,
@@ -57,9 +57,9 @@ export class AppService {
 	}
 
 	async login( credentials: ILoginRequestDto ): Promise<ITokensResponseDto> {
-		const user                             = this.validateUserPassword( credentials,
-		                                                                    await this.findByEmail( credentials.email ),
-		).toJSON();
+		const user                             = ( await this.validateUserPassword( credentials,
+		                                                                            await this.findByEmail( credentials.email ),
+		) ).toJSON();
 		const accessTokenPayload: TokenPayload = {
 			email: user.email,
 			id   : user._id,
@@ -96,8 +96,8 @@ export class AppService {
 
 	}
 
-	async uploadAvatar( avatar: IUploadAvatarRequestDto ): Promise<string> {
-		await this.usersModel.findByIdAndUpdate( avatar.id, { '$set': { avatar: avatar.avatar } }, { new: true } );
+	async uploadAvatar( dto: IUploadAvatarRequestDto ): Promise<string> {
+		await this.usersModel.findByIdAndUpdate( dto.id, { '$set': { avatar: dto.avatar } }, { new: true } );
 		return 'OK';
 	}
 
@@ -112,6 +112,60 @@ export class AppService {
 		} catch ( err ) {
 			return null;
 		}
+
+	}
+
+	async updatePassword( dto: IUpdatePasswordRequestDto ): Promise<string> {
+		let user;
+		try {
+			user = await this.usersModel.findById( dto.id );
+		} catch ( err ) {
+			throw new RpcException( 'User not found' );
+		}
+
+		try {
+			await this.validateUserPassword( {
+				                                 password: dto.old,
+				                                 email   : '',
+			                                 }, user );
+		} catch ( err ) {
+			throw new RpcException( 'Invalid password' );
+		}
+		let hashedPassword;
+		try {
+			hashedPassword = await bcrypt.hash( dto.new, 10 );
+		} catch ( err ) {
+			throw new RpcException( 'Unable to hash password' );
+		}
+
+		try {
+			await this.usersModel.findByIdAndUpdate( user.id, { '$set': { password: hashedPassword } } );
+			return 'OK';
+		} catch ( err ) {
+			throw new RpcException( 'Unable to update password' );
+		}
+	}
+
+	async updateProfile( dto: IUpdateProfileRequestDto ): Promise<IMeResponseDto> {
+		const user = ( await this.usersModel.findByIdAndUpdate( dto.id, {
+			'$set': {
+				email    : dto.email,
+				bio      : dto.bio,
+				firstname: dto.firstname,
+				lastname : dto.lastname,
+			},
+		}, { new: true } ) ).toJSON();
+
+		return {
+			id         : user._id,
+			firstname  : user.firstname,
+			lastname   : user.lastname,
+			email      : user.email,
+			avatar     : user.avatar,
+			roles      : user.roles,
+			bio        : user.bio,
+			dateCreated: user.dateCreated,
+		};
 
 	}
 
@@ -152,8 +206,9 @@ export class AppService {
 		return this.usersModel.findOne( { email } );
 	}
 
-	validateUserPassword( credentials: ILoginRequestDto, user: UsersDocument ): UsersDocument {
-		if ( !user || !bcrypt.compare( credentials.password, user.password ) ) {
+	async validateUserPassword( credentials: ILoginRequestDto, user: UsersDocument ): Promise<UsersDocument> {
+		const valid = await bcrypt.compare( credentials.password, user.password );
+		if ( !user || !valid ) {
 			throw new RpcException( 'Invalid credentials.' );
 		} else {
 			return user;
@@ -171,6 +226,7 @@ export class AppService {
 				email      : user.email,
 				avatar     : user.avatar,
 				roles      : user.roles,
+				bio        : user.bio,
 				dateCreated: user.dateCreated,
 			};
 		} catch ( err ) {
