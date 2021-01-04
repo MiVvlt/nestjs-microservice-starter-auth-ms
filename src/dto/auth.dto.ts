@@ -51,6 +51,7 @@ export class IMeResponseDto {
 	id: string;
 	firstname?: string;
 	lastname?: string;
+	emailValidated?: boolean;
 	avatar: string;
 	bio?: string;
 	email: string;
@@ -62,6 +63,11 @@ export class IUpdatePasswordRequestDto {
 	@IsNotEmpty() id: string;
 	@IsNotEmpty() old: string;
 	@IsNotEmpty() new: string;
+}
+
+export class IResetPasswordRequestDto {
+	@IsNotEmpty() token: string;
+	@IsNotEmpty() password: string;
 }
 
 export class IUpdateProfileRequestDto {

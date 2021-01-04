@@ -2,6 +2,15 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { constants } from './constants';
+import {
+	EmailVerification,
+	EmailVerificationSchema,
+} from './schemas/email-verification.schema';
+import {
+	ForgottenPassword,
+	ForgottenPasswordSchema,
+} from './schemas/forgotten-password.schema';
 import {
 	Users,
 	UsersSchema,
@@ -9,10 +18,16 @@ import {
 import { JwtModule } from '@nestjs/jwt';
 
 @Module( {
-	         imports    : [ MongooseModule.forRoot( 'mongodb://localhost/auth' ),
+	         imports    : [ MongooseModule.forRoot( constants.db.url ),
 	                        MongooseModule.forFeature( [ {
-		                        name: Users.name,
+		                        name  : Users.name,
 		                        schema: UsersSchema,
+	                        },{
+		                        name  : EmailVerification.name,
+		                        schema: EmailVerificationSchema,
+	                        },{
+		                        name  : ForgottenPassword.name,
+		                        schema: ForgottenPasswordSchema,
 	                        },
 	                                                   ] ),
 	                        JwtModule.register( {} ),

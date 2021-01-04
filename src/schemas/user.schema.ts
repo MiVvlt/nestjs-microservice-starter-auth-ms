@@ -26,7 +26,7 @@ export class Users {
 		       required   : false,
 		       data       : Buffer,
 		       contentType: String,
-		       maxlength  : 2000,
+		       maxlength  : 40000,
 	       } ) avatar: string;
 
 	@Prop( {
@@ -35,6 +35,10 @@ export class Users {
 		       validate: [ isEmail, 'invalid email' ],
 		       unique  : true,
 	       } ) email: string;
+
+	@Prop( {
+		       default: false,
+	       } ) emailValidated?: boolean;
 
 	@Prop( {
 		       maxlength: 255,
